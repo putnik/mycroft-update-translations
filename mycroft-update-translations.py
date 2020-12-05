@@ -37,7 +37,6 @@ def get_list_of_skills(path):
 def get_list_of_pofiles():
 
     pathlib.Path(WORKING_DIR).mkdir(parents=True, exist_ok=True)
-    print('Getting Pootle strings from \'' + POOTLE_LOCALE + ' locale...' )
 
     print('Getting Pootle strings from \'' + POOTLE_LOCALE + ' locale...' )
     url = 'https://translate.mycroft.ai/export/?path=/' + POOTLE_LOCALE + '/mycroft-skills'
@@ -165,7 +164,10 @@ def write_nonlocale_translations(path, subdir, translations):
 
     for file in translations:
         extension=file.split('.')[-1]
-        if subdir == extension or (subdir =='vocab' and extension == 'voc') or (subdir =='regex' and extension == 'rx'):
+        if (subdir == extension or
+           (subdir =='vocab' and extension == 'voc') or
+           (subdir =='regex' and extension == 'rx') or
+           (subdir =='dialog' and extension == 'value')):
             lines = ''
             for line in translations[file]:
                 lines = lines+line + '\n'
