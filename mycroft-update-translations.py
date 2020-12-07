@@ -60,8 +60,24 @@ def get_pofile(skill):
     skill_name = os.path.basename(skill)
     po_basename = ''
     po_filename = ''
-    
-    if skill_name[:8] == 'mycroft-' and skill_name[-10:] == '.mycroftai':
+
+    if skill_name == 'count.andlo':
+        po_basename = 'count-ca.po'
+        po_filename = POFILES_DIR + po_basename
+
+    elif skill_name == 'mycroft-spotify.forslund':
+        po_basename = 'spotify-skill-ca.po'
+        po_filename = POFILES_DIR + po_basename
+
+    elif skill_name == 'mycroft-timer.mycroftai':
+        po_basename = 'mycroft-timer-ca.po'
+        po_filename = POFILES_DIR + po_basename
+
+    elif skill_name == 'mycroft-support-helper.mycroftai':
+        po_basename = 'skill-support-ca.po'
+        po_filename = POFILES_DIR + po_basename
+
+    elif skill_name[:8] == 'mycroft-' and skill_name[-10:] == '.mycroftai':
         po_basename = 'skill-' + skill_name[8:-10] + '-ca.po'
         po_filename = POFILES_DIR + po_basename
            
@@ -170,8 +186,12 @@ def write_nonlocale_translations(path, subdir, translations):
         extension=file.split('.')[-1]
         if (subdir == extension or
            (subdir =='vocab' and extension == 'voc') or
+           (subdir =='vocab' and extension == 'intent') or
+           (subdir =='vocab' and extension == 'entity') or
            (subdir =='regex' and extension == 'rx') or
-           (subdir =='dialog' and extension == 'value')):
+           (subdir =='dialog' and extension == 'value') or
+           (subdir =='dialog' and extension == 'template') or
+           (subdir =='dialog' and extension == 'list')):
             lines = ''
             for line in translations[file]:
                 lines = lines+line + '\n'
@@ -223,4 +243,6 @@ for skill in List_of_skills:
                print('Remove ' + MYCROFT_LOCALE + ' subdir from ' + subdir + ' dir')
                remove_old_translations(skill + '/' + subdir)
                write_nonlocale_translations(skill, subdir, translations)
+       else:
+           print('Unable to find a po file matching for \'' + skill +'\'')
 
