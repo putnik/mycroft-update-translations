@@ -170,8 +170,13 @@ def write_locale_translations(path, translations):
             lines = lines+line + '\n'
 
         if lines != '':
+            # Correct StopKeyword.voc from pofile and point to Stop.voc used by mycroft-stop.mycroftai skill
+            if file == 'StopKeyword.voc' and path == MYCROFT_SKILLS_DIR + '/mycroft-stop.mycroftai/locale':
+                file = 'Stop.voc'
+
             pathlib.Path(path + '/' + MYCROFT_LOCALE).mkdir(parents=True, exist_ok=True)
 
+ 
             with open(path + '/' + MYCROFT_LOCALE + '/' + file, 'w') as f:
                 f.write("%s" % lines)
                 f.close()
@@ -227,7 +232,7 @@ for skill in List_of_skills:
            print('Change pofile comments')
            change_pofile_comments(pofile)
            translations = {}
-           translations = get_translations(pofile+'new')
+           translations = get_translations(pofile+'new')                   
            write_locale_translations(skill + '/locale', translations)
 
     else:
