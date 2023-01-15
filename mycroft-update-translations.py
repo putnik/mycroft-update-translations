@@ -29,6 +29,7 @@ import os
 import shutil
 import polib
 from argparse import ArgumentParser
+from termcolor import cprint
 
 MYCROFT_SKILLS_DIR = '/opt/mycroft/skills'
 MYCROFT_LOCALE = 'en-us'
@@ -59,37 +60,34 @@ def is_locale_skill(skill):
     return os.path.isdir(skill + '/locale')
 
 
-def get_pofile(skill):
-    skill_name = os.path.basename(skill)
-    po_basename = ''
-    po_filename = ''
-
+def get_pofile(skill_name):
     if skill_name == 'count.andlo':
         po_basename = 'count-' + POOTLE_LOCALE + '.po'
-        po_filename = POFILES_DIR + po_basename
 
     elif skill_name == 'mycroft-spotify.forslund':
         po_basename = 'spotify-skill-' + POOTLE_LOCALE + '.po'
-        po_filename = POFILES_DIR + po_basename
 
     elif skill_name == 'mycroft-timer.mycroftai':
         po_basename = 'mycroft-timer-' + POOTLE_LOCALE + '.po'
-        po_filename = POFILES_DIR + po_basename
 
     elif skill_name == 'mycroft-support-helper.mycroftai':
         po_basename = 'skill-support-' + POOTLE_LOCALE + '.po'
-        po_filename = POFILES_DIR + po_basename
 
     elif skill_name[:8] == 'mycroft-' and skill_name[-10:] == '.mycroftai':
         po_basename = 'skill-' + skill_name[8:-10] + '-' + POOTLE_LOCALE + '.po'
-        po_filename = POFILES_DIR + po_basename
 
     elif skill_name[-10:] == '.mycroftai':
         po_basename = skill_name[:-10] + '-' + POOTLE_LOCALE + '.po'
-        po_filename = POFILES_DIR + po_basename
 
+    elif skill_name[-10:] == '.mark2':
+        po_basename = skill_name[:-6] + '-' + POOTLE_LOCALE + '.po'
+
+    else:
+        po_basename = skill_name + '-' + POOTLE_LOCALE + '.po'
+
+    po_filename = POFILES_DIR + po_basename
     if po_filename in List_of_pofiles:
-        return (po_filename)
+        return po_filename
 
     return False
 
@@ -220,12 +218,6 @@ def write_nonlocale_translations(path, subdir, translations):
     return
 
 
-def get_new_translations(path, pofile):
-    pathlib.Path(path + '/' + MYCROFT_LOCALE).mkdir(parents=True, exist_ok=True)
-
-    return
-
-
 parser = ArgumentParser()
 parser.add_argument("-l", "--locale", default="en-us", help="Locale code (default en-us)")
 parser.add_argument("-d", "--dir", default="/opt/mycroft/skills", help="Skills dir (default /opt/mycroft/skills)")
@@ -244,36 +236,34 @@ else:
 List_of_pofiles = get_list_of_pofiles()
 
 for skill in List_of_skills:
-    print('Working on ' + skill)
-
     skill_name = skill.split('/')[-1]
-    if skill_name in ['mycroft-weather.mycroftai']:
-        print('It\'s a skill with a broken translation')
+    cprint('\n%s' % skill_name, attrs=['bold'])
+
+    if skill_name in ['mycroft-weather.mycroftai', 'skill-weather']:
+        cprint('  skill with a broken translation', 'red')
         continue
-    elif (is_locale_skill(skill)):
-        print('It\'s a locale skill')
-        pofile = get_pofile(skill)
+    elif is_locale_skill(skill):
+        cprint('  ./locale subdir exists', 'green')
+        pofile = get_pofile(skill_name)
         if pofile:
-            print('Remove ' + MYCROFT_LOCALE + ' subdir from locale dir')
+            cprint('  removing ' + MYCROFT_LOCALE + ' subdir from locale dir', 'green')
             remove_old_translations(skill + '/locale')
-            print('Change pofile comments')
+            cprint('  changing pofile comments', 'green')
             change_pofile_comments(pofile)
-            translations = {}
             translations = get_translations(pofile + 'new')
             write_locale_translations(skill + '/locale', translations)
 
     else:
-        print('It\'s a non-locale skill')
-        pofile = get_pofile(skill)
+        cprint('  no ./locale subdir', 'yellow')
+        pofile = get_pofile(skill_name)
         if pofile:
-            print('Change pofile comments')
+            cprint('  changing pofile comments', 'green')
             change_pofile_comments(pofile)
-            translations = {}
             translations = get_translations(pofile + 'new')
 
             for subdir in ['dialog', 'vocab', 'regex']:
-                print('Remove ' + MYCROFT_LOCALE + ' subdir from ' + subdir + ' dir')
+                cprint('  removing ' + MYCROFT_LOCALE + ' subdir from ' + subdir + ' dir', 'green')
                 remove_old_translations(skill + '/' + subdir)
                 write_nonlocale_translations(skill, subdir, translations)
         else:
-            print('Unable to find a po file matching for \'' + skill + '\'')
+            cprint('  unable to find a matching .po file', 'red')
